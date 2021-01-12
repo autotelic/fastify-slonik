@@ -1,15 +1,3 @@
-# fastify-plugin-example
+# Fastify Slonik
 
-Fastify plugin template.
-
-## Run the example
-
-```shell
-npm run example -- -l info -w
-```
-## Send it a request
-
-```shell
-http localhost:3000
-http post localhost:3000
-```
+A [Fastify] plugin that uses the PostgreSQL client, [Slonik]. Slonik abstracts repeating code patterns, protects against unsafe connection handling and value interpolation, and provides a rich debugging experience.
