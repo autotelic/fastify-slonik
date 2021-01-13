@@ -3,29 +3,32 @@
 const fastifyPlugin = require('fastify-plugin')
 const { createPool, sql } = require('slonik')
 
-const fastifySlonik = async (fastify, options) => {
-  const { connectionString } = options
-  const pool = createPool(connectionString)
+function initFastifySlonik (initPool = createPool, sqlClient = sql) {
+  const fastifySlonik = async (fastify, options) => {
+    const { connectionString } = options
+    const pool = initPool(connectionString)
+    try {
+      await pool.connect(async connection => {
+        fastify.log.info('connected to postgres db')
+      })
+    } catch (err) {
+      fastify.log.error(err)
+    }
+    console.log('connected')
+    const db = {
+      connect: pool.connect.bind(pool),
+      pool: pool
+    }
 
-  try {
-    await pool.connect(async connection => {
-      fastify.log.info('connected to postgres db')
-    })
-  } catch (err) {
-    fastify.log.error(err)
+    fastify.decorate('slonik', db)
+    fastify.decorate('sql', sqlClient)
   }
-
-  const db = {
-    connect: pool.connect.bind(pool),
-    pool: pool
-  }
-
-  fastify.decorate('slonik', db)
-  fastify.decorate('sql', sql)
+  return fastifySlonik
 }
 
-module.exports = fastifyPlugin(fastifySlonik, {
+module.exports = fastifyPlugin(initFastifySlonik(), {
   fastify: '3.x',
   name: 'fastify-slonik',
   dependencies: ['slonik']
 })
+module.exports.plugin = initFastifySlonik
