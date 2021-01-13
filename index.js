@@ -24,4 +24,8 @@ const fastifySlonik = async (fastify, options) => {
   fastify.decorate('sql', sql)
 }
 
-module.exports = fastifyPlugin(fastifySlonik)
+module.exports = fastifyPlugin(fastifySlonik, {
+  fastify: '3.x',
+  name: 'fastify-slonik',
+  dependencies: ['slonik']
+})
