@@ -1,19 +1,28 @@
 # Fastify Slonik
 
-A [Fastify] plugin that uses the PostgreSQL client, [Slonik]. Slonik abstracts repeating code patterns, protects against unsafe connection handling and value interpolation, and provides a rich debugging experience.
+A [Fastify](https://www.fastify.io/) plugin that uses the PostgreSQL client, [Slonik](https://www.npmjs.com/package/slonik). Slonik abstracts repeating code patterns, protects against unsafe connection handling and value interpolation, and provides a rich debugging experience.
 
-## Setup
+## Usage
 
-- Clone and install `npm i`
+Example:
+
+```js
+const fastifySlonik = require('./plugins/fastify-slonik')
+
+module.exports = async function (fastify, options) {
+  fastify.register(fastifySlonik, {
+    connectionString: process.env.DATABASE_URL
+  })
+  
+// To Do: Add mock routes...
+```
 
 ## Dependencies
 
-- fastify-plugin: ^3.0.x,
-- slonik: ^23.5.x
 - fastify: ^3.0.x,
 - fastify-cli: ^2.5.x,
-- standard: ^14.3.x,
-- lint-staged: ^10.2.x
+- fastify-plugin: ^3.0.x,
+- slonik: ^23.5.x
 
 ## License
 
