@@ -7,7 +7,7 @@
     "dev": "node index.js",
     "fix": "npm run lint -- --fix",
     "lint": "standard",
-    "test": "tap --100 -j1 -R classic index.test.js",
+    "test": "tap --100 -j1 -R classic test/index.test.js",
     "validate": "npm run lint && npm run test"
   },
   "repository": {
