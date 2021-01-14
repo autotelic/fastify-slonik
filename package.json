@@ -8,7 +8,9 @@
     "fix": "npm run lint -- --fix",
     "lint": "standard",
     "test": "tap --100 -j1 -R classic test/index.test.js",
-    "validate": "npm run lint && npm run test"
+    "validate": "npm run lint && npm run test",
+    "postgres": "docker run -p 5432:5432 --name fastify-slonik -e POSTGRES_PASSWORD=postgres -d postgres",
+    "load-data": "docker exec -it fastify-slonik psql -c 'CREATE TABLE users(id serial PRIMARY KEY, username VARCHAR (50) NOT NULL);' -U postgres -d postgres"
   },
   "repository": {
     "type": "git",
