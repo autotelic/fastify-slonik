@@ -63,5 +63,3 @@ View [Slonik API](https://github.com/gajus/slonik#slonik-usage-api) for details.
 ## License
 
 Licensed under [MIT](./LICENSE).
-
-
