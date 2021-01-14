@@ -4,26 +4,64 @@ A [Fastify](https://www.fastify.io/) plugin that uses the PostgreSQL client, [Sl
 
 ## Usage
 
-Example:
-
-```js
-const fastifySlonik = require('./plugins/fastify-slonik')
-
-module.exports = async function (fastify, options) {
-  fastify.register(fastifySlonik, {
-    connectionString: process.env.DATABASE_URL
-  })
-  
-// To Do: Add mock routes...
+```sh
+npm i @autotelic/fastify-slonik
 ```
 
-## Dependencies
+##### To configure testing with specific database:
+- If you haven't already, install [direnv](https://direnv.net/docs/installation.html) - you'll need to restart/refresh your shell after installation
+- Unblock .envrc by running command `direnv allow`
+- Create .envrc `cp .envrc.example .envrc`
+- Copy your public ip
 
-- fastify: ^3.0.x,
-- fastify-cli: ^2.5.x,
-- fastify-plugin: ^3.0.x,
-- slonik: ^23.5.x
+```sh
+$ ifconfig -u | grep 'inet ' | grep -v 127.0.0.1 | cut -d\  -f2 | head -1
+# <your-public-ip> <-- Copy this
+```
+
+- Update .envrc with copied public-ip `export PUBLIC_IP=<your-public-ip>`
+
+##### Example:
+
+```js
+// index.js
+const fastifySlonik = require('fastify-slonik')
+
+// register fastify-slonik
+fastify.register(fastifySlonik, {
+  connectionString: process.env.DATABASE_URL
+})
+
+// setup test route
+fastify.get('/users', async function (request, reply) {
+  const { params: { id: userId } } = request
+
+  const queryText = this.sql`
+    SELECT * FROM users
+    WHERE user_id = ${userId}
+  `
+
+  const user = await this.slonik.connect(connection => {
+    return connection.one(queryText)
+  })
+
+  reply.send(user)
+}
+```
+
+## API
+
+#### Decorator
+
+This plugin decorates fastify with `slonik` exposing `connect` and `pool`.
+View [Slonik API](https://github.com/gajus/slonik#slonik-usage-api) for details.
+
+## Testing
+
+[Tap](https://node-tap.org/) is used for testing. Use `npm test` command to run tests.
 
 ## License
 
 Licensed under [MIT](./LICENSE).
+
+
