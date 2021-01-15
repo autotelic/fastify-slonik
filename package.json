@@ -1,31 +1,36 @@
 {
-  "name": "fastify-plugin-template",
+  "name": "@autotelic/fastify-slonik",
   "version": "0.0.0",
-  "description": "Plugin for fastify",
+  "description": "A Slonik plugin for Fastify",
   "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
   "scripts": {
-    "test": "test",
-    "example": "fastify start example.js",
-    "lint": "standard",
+    "dev": "node index.js",
     "fix": "npm run lint -- --fix",
-    "validate": "npm run lint && npm run test"
+    "lint": "standard",
+    "test": "tap --100 -j1 -R classic test/index.test.js",
+    "validate": "npm run lint && npm run test",
+    "postgres": "docker run -p 5432:5432 --name fastify-slonik -e POSTGRES_PASSWORD=postgres -d postgres",
+    "load-data": "docker exec -it fastify-slonik psql -c 'CREATE TABLE users(id serial PRIMARY KEY, username VARCHAR (50) NOT NULL);' -U postgres -d postgres"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/autotelic/fastify-plugin-template.git"
+    "url": "git+https://github.com/autotelic/fastify-slonik.git"
   },
-  "keywords": [],
+  "keywords": [
+    "fastify",
+    "slonik",
+    "postgresql",
+    "plugin"
+  ],
   "author": "Autotelic Development Ltd <info@autotelic.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/autotelic/fastify-plugin-template/issues"
+    "url": "https://github.com/autotelic/fastify-slonik/issues"
   },
-  "homepage": "https://github.com/autotelic/fastify-plugin-template#readme",
+  "homepage": "https://github.com/autotelic/fastify-slonik#readme",
   "dependencies": {
-    "fastify-plugin": "^3.0.0"
+    "fastify-plugin": "^3.0.0",
+    "slonik": "^23.5.4"
   },
   "devDependencies": {
     "tap": "^14.0.0",

@@ -1,13 +1,30 @@
 'use strict'
 
 const fastifyPlugin = require('fastify-plugin')
-const { plugin } = require('./lib')
+const { createPool, sql } = require('slonik')
 
-const DECORATOR = 'fastify-plugin-template'
+const fastifySlonik = async (fastify, options) => {
+  const { connectionString } = options
+  const pool = createPool(connectionString)
 
-module.exports = fastifyPlugin(function (fastify, options, next) {
-  fastify.addHook('onRequest', plugin(options))
-  next()
-}, {
-  name: DECORATOR
+  try {
+    await pool.connect(async connection => {
+      fastify.log.info('connected to postgres db')
+    })
+  } catch (err) {
+    fastify.log.error(err)
+  }
+
+  const db = {
+    connect: pool.connect.bind(pool),
+    pool: pool
+  }
+
+  fastify.decorate('slonik', db)
+  fastify.decorate('sql', sql)
+}
+
+module.exports = fastifyPlugin(fastifySlonik, {
+  fastify: '3.x',
+  name: 'fastify-slonik'
 })
