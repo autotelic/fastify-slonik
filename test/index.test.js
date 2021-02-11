@@ -37,7 +37,12 @@ test('When fastify.slonik root namespace is used:', async t => {
   const fastify = Fastify()
 
   t.teardown(async () => {
-    const removeUser = fastify.sql`DELETE FROM users WHERE username=${testName};`
+    const removeUser = fastify.sql`
+      DELETE FROM
+        users
+      WHERE
+        username=${testName};
+    `
     await fastify.slonik.transaction(removeUser)
     fastify.close()
   })
@@ -70,7 +75,12 @@ test('When fastify.slonik root namespace is used:', async t => {
 
   t.test('should be able to make a exists query', async t => {
     const queryString = fastify.sql`
-    SELECT 1 FROM users WHERE username=${testName}
+      SELECT
+        1
+      FROM
+        users
+      WHERE
+        username=${testName}
     `
     const queryResult = await fastify.slonik.exists(queryString)
     t.ok(queryResult)
@@ -78,7 +88,7 @@ test('When fastify.slonik root namespace is used:', async t => {
   t.end()
 })
 
-test('should throw error when pg fails to perform an operation', (t) => {
+test('should throw error when pg fails to perform an operation', async t => {
   const fastify = Fastify()
   t.teardown(() => fastify.close())
 
@@ -86,18 +96,18 @@ test('should throw error when pg fails to perform an operation', (t) => {
     connectionString: connectionStringBadDbName
   })
 
-  fastify.ready(async (err) => {
-    t.error(err)
-    const queryString = fastify.sql`
-      SELECT 1 as one
-    `
-    try {
-      const queryResult = await fastify.slonik.query(queryString)
-      t.fail(queryResult)
-    } catch (err) {
-      t.ok(err)
-      t.is(err.message, `database "${BAD_DB_NAME}" does not exist`)
-    }
-    t.end()
-  })
+  await fastify.ready()
+
+  const queryString = fastify.sql`
+    SELECT 1 as one
+  `
+
+  try {
+    const queryResult = await fastify.slonik.query(queryString)
+    t.fail(queryResult)
+  } catch (err) {
+    t.ok(err)
+    t.is(err.message, `database "${BAD_DB_NAME}" does not exist`)
+  }
+  t.end()
 })
