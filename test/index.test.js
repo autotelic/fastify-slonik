@@ -6,7 +6,6 @@ const connectionString = process.env.DATABASE_URL
 const BAD_DB_NAME = 'db_that_does_not_exist'
 const connectionStringBadDbName = connectionString.replace(/\/[^/]+$/, '/' + BAD_DB_NAME)
 
-
 test('Namespace should exist:', async t => {
   const fastify = Fastify()
 
@@ -22,7 +21,6 @@ test('Namespace should exist:', async t => {
     t.ok(fastify.slonik.query)
     t.ok(fastify.slonik.transaction)
     t.ok(fastify.slonik.exists)
-
   })
 
   t.test('fastify.sql', async t => {
@@ -55,7 +53,7 @@ test('When fastify.slonik root namespace is used:', async t => {
       SELECT 1 as one
     `
     const queryResult = await fastify.slonik.query(queryString)
-    const { rows: [ { one } ] } = queryResult
+    const { rows: [{ one }] } = queryResult
     t.same(one, 1)
   })
 
@@ -69,7 +67,7 @@ test('When fastify.slonik root namespace is used:', async t => {
         *;
     `
     const queryResult = await fastify.slonik.transaction(queryString)
-    const { rows: [ { username } ] } = queryResult
+    const { rows: [{ username }] } = queryResult
     t.same(username, testName)
   })
 

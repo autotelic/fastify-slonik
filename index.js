@@ -16,9 +16,9 @@ const fastifySlonik = async (fastify, options) => {
   }
 
   async function transaction (connection) {
-    return pool.query(connection)    
+    return pool.query(connection)
   }
-  
+
   const db = {
     connect: pool.connect.bind(pool),
     pool: pool,
