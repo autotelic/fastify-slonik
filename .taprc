@@ -3,4 +3,4 @@ test-env:
   - DB_PORT=5432
   - DB_NAME=postgres
   - DB_PASSWORD=postgres
-  - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@0.0.0.0:${DB_PORT}/${DB_NAME}?sslmode=disable
+  - DATABASE_URL=postgres://postgres:postgres@0.0.0.0:5432/postgres?sslmode=disable

@@ -7,6 +7,12 @@ on:
     branches: [main]
 
 jobs:
+  env:
+    DB_USER: postgres
+    DB_PORT: 5432
+    DB_NAME: postgres
+    DB_PASSWORD: postgres
+    DATABASE_URL: postgres://postgres:postgres@0.0.0.0:5432/postgres?sslmode=disable
   build:
     runs-on: ubuntu-latest
 
