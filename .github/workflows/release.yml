@@ -21,7 +21,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: npm install
       - run: npm run lint
-      - run: docker-compose up
+      - run: docker-compose up -d
       - run: npm run load-data
       - run: npm test
 
