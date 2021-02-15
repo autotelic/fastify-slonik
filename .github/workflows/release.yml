@@ -6,6 +6,12 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    env:
+      DB_USER: postgres
+      DB_PORT: 5432
+      DB_NAME: postgres
+      DB_PASSWORD: postgres
+      DATABASE_URL: postgres://postgres:postgres@0.0.0.0:5432/postgres?sslmode=disable
 
     strategy:
       matrix:

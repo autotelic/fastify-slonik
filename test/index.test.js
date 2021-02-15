@@ -14,19 +14,13 @@ test('Namespace should exist:', async t => {
   fastify.register(fastifySlonik, { connectionString })
   await fastify.ready()
 
-  t.test('fastify.slonik', async t => {
-    t.ok(fastify.slonik)
-    t.ok(fastify.slonik.pool)
-    t.ok(fastify.slonik.connect)
-    t.ok(fastify.slonik.query)
-    t.ok(fastify.slonik.transaction)
-    t.ok(fastify.slonik.exists)
-  })
-
-  t.test('fastify.sql', async t => {
-    t.ok(fastify.sql)
-  })
-  t.end()
+  t.ok(fastify.hasDecorator('slonik'), 'has slonik decorator')
+  t.ok(fastify.slonik.pool)
+  t.ok(fastify.slonik.connect)
+  t.ok(fastify.slonik.query)
+  t.ok(fastify.slonik.transaction)
+  t.ok(fastify.slonik.exists)
+  t.ok(fastify.hasDecorator('sql'), 'has sql decorator') 
 })
 
 test('When fastify.slonik root namespace is used:', async t => {
@@ -54,7 +48,7 @@ test('When fastify.slonik root namespace is used:', async t => {
     `
     const queryResult = await fastify.slonik.query(queryString)
     const { rows: [{ one }] } = queryResult
-    t.same(one, 1)
+    t.is(one, 1)
   })
 
   t.test('should be able to make a transaction', async t => {
@@ -68,7 +62,7 @@ test('When fastify.slonik root namespace is used:', async t => {
     `
     const queryResult = await fastify.slonik.transaction(queryString)
     const { rows: [{ username }] } = queryResult
-    t.same(username, testName)
+    t.is(username, testName)
   })
 
   t.test('should be able to make a exists query', async t => {
@@ -83,7 +77,6 @@ test('When fastify.slonik root namespace is used:', async t => {
     const queryResult = await fastify.slonik.exists(queryString)
     t.ok(queryResult)
   })
-  t.end()
 })
 
 test('should throw error when pg fails to perform an operation', async t => {
@@ -107,5 +100,4 @@ test('should throw error when pg fails to perform an operation', async t => {
     t.ok(err)
     t.is(err.message, `database "${BAD_DB_NAME}" does not exist`)
   }
-  t.end()
 })
