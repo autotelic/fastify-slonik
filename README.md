@@ -28,9 +28,7 @@ fastify.get('/users', async function (request, reply) {
     WHERE user_id = ${userId}
   `
 
-  const user = await this.slonik.connect(connection => {
-    return connection.one(queryText)
-  })
+  const user = await this.slonik.query(queryText)
 
   reply.send(user)
 }
@@ -40,7 +38,7 @@ fastify.get('/users', async function (request, reply) {
 
 #### Decorator
 
-This plugin decorates fastify with `slonik` exposing `connect` and `pool`.
+This plugin decorates fastify with `slonik` exposing `connect`, `pool`, `query`, `transaction` and `exists`.
 View [Slonik API](https://github.com/gajus/slonik#slonik-usage-api) for details.
 
 ## Development and Testing
@@ -49,35 +47,14 @@ View [Slonik API](https://github.com/gajus/slonik#slonik-usage-api) for details.
 
 ### Docker approach
 
-First, start postgres with:
-
 ```
-$ npm run postgres
-```
-
-Then you can, in another terminal, find the running docker and init the DB:
-
-```
-$ docker ps
-CONTAINER ID        IMAGE                 COMMAND                  CREATED             STATUS              PORTS                    NAMES
-28341f85c4cd        postgres:9.6-alpine   "docker-entrypoint.s…"   3 minutes ago       Up 3 minutes        0.0.0.0:5432->5432/tcp   fastify-slonik
-
-$ npm run load-data
+$ docker-compose up
 ```
 
 To run the tests:
 
-- If you haven't already, install [direnv](https://direnv.net/docs/installation.html)
-- Unblock .envrc by running command `direnv allow`
 - Create .envrc `cp .envrc.example .envrc`
-- Copy your public ip
-
-```sh
-$ ifconfig -u | grep 'inet ' | grep -v 127.0.0.1 | cut -d\  -f2 | head -1
-# <your-public-ip> <-- Copy this
-```
-
-- Update .envrc with copied public-ip `export PUBLIC_IP=<your-public-ip>`
+- If not using direnv, update .envrc to .env
 
 ```
 $ npm test
