@@ -15,9 +15,16 @@ const fastifySlonik = async (fastify, options) => {
     fastify.log.error(err)
   }
 
+  async function transaction (connection) {
+    return pool.query(connection)
+  }
+
   const db = {
     connect: pool.connect.bind(pool),
-    pool: pool
+    pool: pool,
+    query: pool.query.bind(pool),
+    transaction: transaction.bind(pool),
+    exists: pool.exists.bind(pool)
   }
 
   fastify.decorate('slonik', db)

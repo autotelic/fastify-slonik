@@ -1,73 +1,85 @@
 const { test } = require('tap')
 const Fastify = require('fastify')
 const fastifySlonik = require('../index')
-const { BAD_DB_NAME, connectionString, connectionStringBadDbName } = require('./helpers')
 
-test('Namespace should exist:', (t) => {
-  t.test('fastify.slonik', t => {
-    t.plan(4)
+const connectionString = process.env.DATABASE_URL
+const BAD_DB_NAME = 'db_that_does_not_exist'
+const connectionStringBadDbName = connectionString.replace(/\/[^/]+$/, '/' + BAD_DB_NAME)
 
-    const fastify = Fastify()
-    t.teardown(() => fastify.close())
+test('Namespace should exist:', async t => {
+  const fastify = Fastify()
 
-    fastify.register(fastifySlonik, {
-      connectionString
-    })
-    fastify.ready((err) => {
-      t.error(err)
+  t.teardown(() => fastify.close())
 
-      t.ok(fastify.slonik)
-      t.ok(fastify.slonik.pool)
-      t.ok(fastify.slonik.connect)
-    })
-  })
-  test('fastify.sql', (t) => {
-    t.plan(2)
+  fastify.register(fastifySlonik, { connectionString })
+  await fastify.ready()
 
-    const fastify = Fastify()
-    t.teardown(() => fastify.close())
-
-    fastify.register(fastifySlonik, {
-      connectionString
-    })
-
-    fastify.ready((err) => {
-      t.error(err)
-
-      t.ok(fastify.sql)
-    })
-  })
-  t.end()
+  t.ok(fastify.hasDecorator('slonik'), 'has slonik decorator')
+  t.ok(fastify.slonik.pool)
+  t.ok(fastify.slonik.connect)
+  t.ok(fastify.slonik.query)
+  t.ok(fastify.slonik.transaction)
+  t.ok(fastify.slonik.exists)
+  t.ok(fastify.hasDecorator('sql'), 'has sql decorator')
 })
 
-test('When fastify.slonik root namespace is used:', (t) => {
-  t.test('should be able to use make a query', t => {
-    t.plan(2)
+test('When fastify.slonik root namespace is used:', async t => {
+  const testName = 'foobar'
 
-    const fastify = Fastify()
-    t.teardown(() => fastify.close())
+  const fastify = Fastify()
 
-    fastify.register(fastifySlonik, {
-      connectionString
-    })
-
-    fastify.ready(async (err) => {
-      t.error(err)
-      const queryString = fastify.sql`
-        SELECT 1 as one
-      `
-
-      const queryResult = await fastify.slonik.connect(connection => {
-        return connection.query(queryString)
-      })
-
-      t.equal(queryResult.rows[0].one, 1)
-    })
+  t.teardown(async () => {
+    const removeUser = fastify.sql`
+      DELETE FROM
+        users
+      WHERE
+        username=${testName};
+    `
+    await fastify.slonik.transaction(removeUser)
+    fastify.close()
   })
-  t.end()
+
+  fastify.register(fastifySlonik, { connectionString })
+  await fastify.ready()
+
+  t.test('should be able to make a query', async t => {
+    const queryString = fastify.sql`
+      SELECT 1 as one
+    `
+    const queryResult = await fastify.slonik.query(queryString)
+    const { rows: [{ one }] } = queryResult
+    t.is(one, 1)
+  })
+
+  t.test('should be able to make a transaction', async t => {
+    const queryString = fastify.sql`
+      INSERT INTO
+        users(username)
+      VALUES
+        (${testName})
+      RETURNING
+        *;
+    `
+    const queryResult = await fastify.slonik.transaction(queryString)
+    const { rows: [{ username }] } = queryResult
+    t.is(username, testName)
+  })
+
+  t.test('should be able to make a exists query', async t => {
+    const queryString = fastify.sql`
+      SELECT
+        1
+      FROM
+        users
+      WHERE
+        username=${testName}
+    `
+    const queryResult = await fastify.slonik.exists(queryString)
+    t.ok(queryResult)
+  })
 })
 
-test('should throw error when pg fails to perform an operation', (t) => {
+test('should throw error when pg fails to perform an operation', async t => {
   const fastify = Fastify()
   t.teardown(() => fastify.close())
 
@@ -75,20 +87,17 @@ test('should throw error when pg fails to perform an operation', (t) => {
     connectionString: connectionStringBadDbName
   })
 
-  fastify.ready(async (err) => {
-    t.error(err)
-    const queryString = fastify.sql`
-      SELECT 1 as one
-    `
-    try {
-      const queryResult = await fastify.slonik.connect(connection => {
-        return connection.query(queryString)
-      })
-      t.fail(queryResult)
-    } catch (err) {
-      t.ok(err)
-      t.is(err.message, `database "${BAD_DB_NAME}" does not exist`)
-    }
-    t.end()
-  })
+  await fastify.ready()
+
+  const queryString = fastify.sql`
+    SELECT 1 as one
+  `
+
+  try {
+    const queryResult = await fastify.slonik.query(queryString)
+    t.fail(queryResult)
+  } catch (err) {
+    t.ok(err)
+    t.is(err.message, `database "${BAD_DB_NAME}" does not exist`)
+  }
 })
