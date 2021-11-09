@@ -24,7 +24,8 @@ const fastifySlonik = async (fastify, options) => {
     pool: pool,
     query: pool.query.bind(pool),
     transaction: transaction.bind(pool),
-    exists: pool.exists.bind(pool)
+    exists: pool.exists.bind(pool),
+    one: pool.one.bind(pool)
   }
 
   fastify.decorate('slonik', db)

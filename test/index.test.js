@@ -20,6 +20,7 @@ test('Namespace should exist:', async t => {
   t.ok(fastify.slonik.query)
   t.ok(fastify.slonik.transaction)
   t.ok(fastify.slonik.exists)
+  t.ok(fastify.slonik.one)
   t.ok(fastify.hasDecorator('sql'), 'has sql decorator')
 })
 
