@@ -23,7 +23,7 @@ fastify.register(fastifySlonik, {
 fastify.get('/users', async function (request, reply) {
   const { params: { id: userId } } = request
 
-  const queryText = this.sql`
+  const queryText = this.slonik.sql`
     SELECT * FROM users
     WHERE user_id = ${userId}
   `
@@ -38,14 +38,14 @@ fastify.get('/users', async function (request, reply) {
 
 #### Decorator
 
-This plugin decorates fastify with `slonik` exposing `connect`, `pool`, `query`, `transaction` and `exists`.
+This plugin decorates fastify with `slonik` exposing all query methods.
 View [Slonik API](https://github.com/gajus/slonik#slonik-usage-api) for details.
 
 ## Development and Testing
 
-[Tap](https://node-tap.org/) is used for testing. Use `npm test` command to run tests.
+[Tap](https://node-tap.org/) is used for testing
 
-### Docker approach
+### Fixtures
 
 ```
 $ docker-compose up
@@ -59,16 +59,6 @@ To run the tests:
 ```
 $ npm test
 ```
-
-### Custom Postgres approach
-
-1. Set up a database of your choice in a postgres server of your choice
-2. Create the required table using
-    ```sql
-    CREATE TABLE users(id serial PRIMARY KEY, username VARCHAR (50) NOT NULL);
-    ```
-3. Create .envrc `cp .envrc.example .envrc` and update environment variables accordingly
-
 
 ## License
 
