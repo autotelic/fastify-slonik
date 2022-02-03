@@ -1,6 +1,6 @@
 {
   "name": "@autotelic/fastify-slonik",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A Slonik plugin for Fastify",
   "main": "index.js",
   "scripts": {
