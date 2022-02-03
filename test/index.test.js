@@ -15,13 +15,28 @@ test('Namespace should exist:', async t => {
   await fastify.ready()
 
   t.ok(fastify.hasDecorator('slonik'), 'has slonik decorator')
-  t.ok(fastify.slonik.pool)
+  t.ok(fastify.slonik.sql)
   t.ok(fastify.slonik.connect)
   t.ok(fastify.slonik.query)
   t.ok(fastify.slonik.transaction)
   t.ok(fastify.slonik.exists)
   t.ok(fastify.slonik.one)
-  t.ok(fastify.hasDecorator('sql'), 'has sql decorator')
+})
+
+test('Supports passing slonik pool options:', async t => {
+  const fastify = Fastify()
+
+  let called
+  const poolOpts = {
+    interceptors: [
+      { beforeQueryExecution: async () => { called = true } }
+    ]
+  }
+  fastify.register(fastifySlonik, { connectionString, poolOpts })
+  await fastify.ready()
+  const queryString = fastify.slonik.sql`SELECT 1 as one`
+  await fastify.slonik.query(queryString)
+  t.true(called)
 })
 
 test('When fastify.slonik root namespace is used:', async t => {
@@ -30,13 +45,13 @@ test('When fastify.slonik root namespace is used:', async t => {
   const fastify = Fastify()
 
   t.teardown(async () => {
-    const removeUser = fastify.sql`
+    const removeUser = fastify.slonik.sql`
       DELETE FROM
         users
       WHERE
         username=${testName};
     `
-    await fastify.slonik.transaction(removeUser)
+    await fastify.slonik.transaction((t) => t.query(removeUser))
     fastify.close()
   })
 
@@ -44,7 +59,7 @@ test('When fastify.slonik root namespace is used:', async t => {
   await fastify.ready()
 
   t.test('should be able to make a query', async t => {
-    const queryString = fastify.sql`
+    const queryString = fastify.slonik.sql`
       SELECT 1 as one
     `
     const queryResult = await fastify.slonik.query(queryString)
@@ -53,7 +68,7 @@ test('When fastify.slonik root namespace is used:', async t => {
   })
 
   t.test('should be able to make a transaction', async t => {
-    const queryString = fastify.sql`
+    const queryString = fastify.slonik.sql`
       INSERT INTO
         users(username)
       VALUES
@@ -61,13 +76,15 @@ test('When fastify.slonik root namespace is used:', async t => {
       RETURNING
         *;
     `
-    const queryResult = await fastify.slonik.transaction(queryString)
+    const queryResult = await fastify.slonik.transaction(
+      (t) => t.query(queryString)
+    )
     const { rows: [{ username }] } = queryResult
     t.is(username, testName)
   })
 
   t.test('should be able to make a exists query', async t => {
-    const queryString = fastify.sql`
+    const queryString = fastify.slonik.sql`
       SELECT
         1
       FROM
@@ -90,7 +107,7 @@ test('should throw error when pg fails to perform an operation', async t => {
 
   await fastify.ready()
 
-  const queryString = fastify.sql`
+  const queryString = fastify.slonik.sql`
     SELECT 1 as one
   `
 

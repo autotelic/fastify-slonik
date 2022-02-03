@@ -4,8 +4,8 @@ const fastifyPlugin = require('fastify-plugin')
 const { createPool, sql } = require('slonik')
 
 const fastifySlonik = async (fastify, options) => {
-  const { connectionString } = options
-  const pool = createPool(connectionString)
+  const { connectionString, poolOpts = {} } = options
+  const pool = createPool(connectionString, poolOpts)
 
   try {
     await pool.connect(async connection => {
@@ -15,21 +15,14 @@ const fastifySlonik = async (fastify, options) => {
     fastify.log.error(err)
   }
 
-  async function transaction (connection) {
-    return pool.query(connection)
-  }
+  fastify.decorate('slonik', {
+    sql,
+    ...pool
+  })
 
-  const db = {
-    connect: pool.connect.bind(pool),
-    pool: pool,
-    query: pool.query.bind(pool),
-    transaction: transaction.bind(pool),
-    exists: pool.exists.bind(pool),
-    one: pool.one.bind(pool)
-  }
-
-  fastify.decorate('slonik', db)
-  fastify.decorate('sql', sql)
+  fastify.addHook('onClose', async () => {
+    await pool.end()
+  })
 }
 
 module.exports = fastifyPlugin(fastifySlonik, {
