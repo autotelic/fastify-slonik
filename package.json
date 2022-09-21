@@ -32,11 +32,11 @@
     "slonik": "^23.5.4"
   },
   "devDependencies": {
-    "tap": "^14.0.0",
-    "fastify": "^3.0.0",
-    "fastify-cli": "^2.5.1",
+    "fastify": "^4.6.0",
+    "fastify-cli": "^5.4.2",
+    "lint-staged": "^10.2.11",
     "standard": "^14.3.4",
-    "lint-staged": "^10.2.11"
+    "tap": "^14.0.0"
   },
   "lint-staged": {
     "*.{js,jsx}": [

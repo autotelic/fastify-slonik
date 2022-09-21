@@ -26,6 +26,6 @@ const fastifySlonik = async (fastify, options) => {
 }
 
 module.exports = fastifyPlugin(fastifySlonik, {
-  fastify: '3.x',
+  fastify: '4.x',
   name: 'fastify-slonik'
 })
